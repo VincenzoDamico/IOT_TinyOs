@@ -1,0 +1,29 @@
+
+configuration TemperatureSensingAppC{
+}
+
+implementation{ 
+	components TemperatureSensingC, MainC, LedsC;
+	components  PrintfC, SerialStartC; 
+	components new TimerMilliC() as Timer;
+	components new SensirionSht11C() as Sensor;
+	components new HamamatsuS1087ParC() as Lumi;
+	components UserButtonC;
+
+	components ActiveMessageC;
+	components new AMSenderC(AM_SENSOR_MESSAGE);
+	
+
+	
+	TemperatureSensingC.Boot -> MainC.Boot;
+	TemperatureSensingC.ReadTemp -> Sensor.Temperature;
+	TemperatureSensingC.ReadHumidity -> Sensor.Humidity;
+	TemperatureSensingC.ReadLumi -> Lumi;
+	TemperatureSensingC.Timer -> Timer;
+        TemperatureSensingC.Leds -> LedsC;
+	TemperatureSensingC.Get-> UserButtonC;
+	TemperatureSensingC.Notify -> UserButtonC;
+
+	
+
+}

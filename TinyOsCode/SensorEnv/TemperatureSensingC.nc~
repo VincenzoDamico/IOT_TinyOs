@@ -1,0 +1,117 @@
+
+#include <Timer.h>
+#include <printf.h>
+#include <string.h>
+#include <UserButton.h>
+#include <SensorMsg.h>
+
+
+
+module TemperatureSensingC{
+
+  uses {
+    interface Boot;
+    interface Timer<TMilli>;
+    interface Read<uint16_t> as ReadTemp;
+    interface Read<uint16_t> as ReadLumi;
+    interface Read<uint16_t> as ReadHumidity;
+    interface Leds;
+    interface Get<button_state_t>;
+    interface Notify<button_state_t>;
+
+  }
+
+}
+
+implementation{
+  typedef enum { false, true } bool;
+  // sampling frequency in binary milliseconds
+  #define SAMPLING_FREQUENCY 1000
+  float temp=0;
+  uint16_t lum=0;
+  uint16_t hum=0;
+  bool powerFlag=false;
+
+  
+  event void Boot.booted() {
+    call Leds.led0On();
+    call Notify.enable();
+   
+  }
+
+  event void Timer.fired(){
+    call ReadTemp.read();
+    call ReadLumi.read();
+    call ReadHumidity.read();
+    
+  }
+
+  event void Notify.notify(button_state_t val){
+	if(val == BUTTON_PRESSED){
+		if (powerFlag==false){
+	 		call Leds.led1On();
+    			call Leds.led0Off();
+		}else {
+			call Leds.led1Off();
+    			call Leds.led0On();
+		}
+	}else if(val == BUTTON_RELEASED){
+		if (powerFlag==false){
+			call Timer.startPeriodic(SAMPLING_FREQUENCY);
+			powerFlag=true;
+		} else{
+			powerFlag=false;	
+			call Timer.stop();	
+		}
+	}
+
+  }
+ 
+  event void ReadHumidity.readDone(error_t result, uint16_t data){
+
+	printf("\n-----------\t");
+	printfflush();
+ 	if (result != SUCCESS){
+		call Leds.led0Toggle();
+		data = 0xffff;			
+      	}
+	hum=data;
+	printf("\nHumidity: %d \t", (int)hum);
+	printfflush();
+	call Leds.led2Off();
+
+  }
+
+  event void ReadTemp.readDone(error_t result, uint16_t data){
+	int t_int;
+	int t_dec;
+	printf("\n-----------\t");
+	printfflush();
+ 	if (result != SUCCESS){
+		call Leds.led0Toggle();
+		data = 0xffff;			
+      	}
+
+	temp = -39 + 0.01 * data;
+        t_int = (int) temp;
+        t_dec = (int)((temp - t_int) * 10);
+
+
+        printf("\nTemperature: %d.%d \t", t_int, t_dec);
+
+	printfflush();
+  }
+
+  event void ReadLumi.readDone(error_t result, uint16_t data) {
+	printf("\n-----------\t");
+	printfflush();
+ 	if (result != SUCCESS ){
+		call Leds.led0Toggle();
+		data = 0xffff;			
+	}
+	lum=data;
+   	printf("\nLuminosity: %d \t", (int)lum);
+	printfflush();		
+  }
+
+}

@@ -1,0 +1,177 @@
+
+#include <Timer.h>
+#include <printf.h>
+#include <string.h>
+#include <UserButton.h>
+#include "SensorMsg.h"
+
+
+
+module SensingC{
+
+  uses {
+    interface Boot;
+    interface Timer<TMilli>;
+    interface Read<uint16_t> as ReadTemp;
+    interface Read<uint16_t> as ReadLumi;
+    interface Read<uint16_t> as ReadHumidity;
+    interface Leds;
+    interface Get<button_state_t>;
+    interface Notify<button_state_t>;
+    //le uso per mandare messaggi
+    interface SplitControl as RadioControl;
+    interface Packet;
+    interface AMPacket;
+    interface AMSend;
+    interface LocalTime<TMilli>;
+
+  }
+
+}
+
+implementation{
+  typedef enum { false, true } bool;
+  // sampling frequency in binary milliseconds
+  #define SAMPLING_FREQUENCY 1000
+  uint16_t temp=0;
+  uint16_t lum=0;
+  uint16_t hum=0;
+  bool powerFlag=false;
+
+  bool radioON = FALSE;
+  bool busy = FALSE;
+  message_t packet;
+  SensorMsgStr* msg;
+
+  void sendPacket() {
+        uint32_t time;
+     	if (busy && !radioON)
+		return;
+    	msg = (SensorMsgStr*) call Packet.getPayload(&packet, sizeof(SensorMsgStr));
+    	if (msg == NULL) return;
+	time =call LocalTime.get();
+      	printf("\nTime from the boot in ms:  %lu \t", (unsigned long)time);
+   	msg->nodeid = TOS_NODE_ID;
+    	msg->temperature = temp;  
+    	msg->humidity = hum;
+    	msg->luminosity = lum;
+    	msg->timestamp = time;
+	//AM_BROADCAST_ADDR è il messaggio in bradcast ha tutti quelli che sono nel raggio radio 
+    	if (call AMSend.send(AM_BROADCAST_ADDR, &packet, sizeof(SensorMsgStr)) == SUCCESS) {
+      		busy = TRUE;
+		call Leds.led2On();
+
+    	} else {
+      		printf("\nSend failed");
+    	}
+
+    	printfflush();
+  }
+
+
+  
+  event void Boot.booted() {
+    call Leds.led0On();
+    call Notify.enable();
+   
+  }
+
+  event void Timer.fired(){
+    call ReadTemp.read();    
+  }
+
+  event void RadioControl.startDone(error_t err){
+	if (err == SUCCESS) {
+		radioON = TRUE;
+	}
+	else {
+		call RadioControl.start();
+	}
+  }
+
+  event void RadioControl.stopDone(error_t err){
+	if (err == SUCCESS) {
+		radioON = FALSE;
+	}
+	else {
+		call RadioControl.stop();
+	}
+  }
+
+
+
+  event void Notify.notify(button_state_t val){
+	if(val == BUTTON_PRESSED){
+		if (powerFlag==false){
+	 		call Leds.led1On();
+    			call Leds.led0Off();
+		}else {
+			call Leds.led1Off();
+    			call Leds.led0On();
+		}
+	}else if(val == BUTTON_RELEASED){
+		if (powerFlag==false){
+    			call RadioControl.start();
+			call Timer.startPeriodic(SAMPLING_FREQUENCY);
+			powerFlag=true;
+		} else{
+			call RadioControl.stop();
+			powerFlag=false;	
+			call Timer.stop();	
+		}
+	}
+
+  }
+ 
+  event void ReadHumidity.readDone(error_t result, uint16_t data){
+ 	if (result != SUCCESS){
+		data = 0xffff;			
+      	}
+	hum=data;
+	printf("\nHumidity: %d \t", (int)hum);
+	printf("\n-----------\t");
+	printfflush();
+	sendPacket();
+
+  }
+
+  event void ReadTemp.readDone(error_t result, uint16_t data){
+	int t_int;
+	int t_dec;
+	float res;
+	printf("\n-----------\t");
+	printfflush();
+ 	if (result != SUCCESS){
+		data = 0xffff;			
+      	}
+
+	res = -39.60f + 0.01f * (float)data;
+        t_int = (int) res;
+        t_dec = (int)((res - t_int) * 10);
+	temp=(t_int)*10+t_dec;
+
+        printf("\nTemperature: %d.%d \t", t_int, t_dec);
+
+	printfflush();
+	call ReadLumi.read();
+  }
+
+  event void ReadLumi.readDone(error_t result, uint16_t data) {
+ 	if (result != SUCCESS ){
+		data = 0xffff;			
+	}
+	lum=data;
+   	printf("\nLuminosity: %d \t", (int)lum);
+	printfflush();	
+	call ReadHumidity.read();	
+  }
+
+  event void AMSend.sendDone(message_t* m, error_t error){
+	if (error == SUCCESS) {
+		busy = FALSE;
+		call Leds.led2Off();
+	}
+  }
+  
+
+}
