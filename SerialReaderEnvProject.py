@@ -1,6 +1,5 @@
 import serial
 import re
-import datetime
 
 SERIAL_PORT = 'COM4'
 BAUD_RATE = 115200
