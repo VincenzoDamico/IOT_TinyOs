@@ -1,0 +1,2 @@
+COMPONENT=TempSensAppC
+include $(MAKERULES)
