@@ -9,5 +9,8 @@ if __name__ == "__main__":
     model = SensorModel()
     view = SensorView(app)
     controller = SensorController(model, view, app)
-    app.mainloop()
+    try:
+        app.mainloop()
+    except KeyboardInterrupt:
+        print("\nLettura interrotta dall'utente")
     controller.running = False

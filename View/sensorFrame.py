@@ -13,15 +13,15 @@ class SensorFrame(Frame):
         self.lum = StringVar()
         self.time = StringVar()
 
-
+    # Sensor ID
         Label(self, text="SensorID:", bg="midnightblue",
               font=("System", 17, "bold"), fg="ghostwhite").grid(
             row=0, column=0, padx=50, pady=(70, 35))
 
-        # Sensor ID
+    
         Label(self, textvariable=self.sensorID, bg="midnightblue",
               font=("System", 25, "bold"), fg="ghostwhite").grid(
-            row=1, column=0, padx=50, pady=(70, 35))
+            row=0, column=0, padx=(150,0), pady=(30, 0))
 
         # Temperature
         Label(self, text="Temperature", bg="midnightblue",
@@ -58,6 +58,7 @@ class SensorFrame(Frame):
         Label(self, image=self.im_Lum, bd=0, textvariable=self.lum,
               compound="center", font=("System", 22, "bold"),
               fg="lavender", bg="midnightblue").grid(row=2, column=5, sticky="w", padx=20, pady=1.5)
+        
 
         # Timestamp
         Label(self, text="Timestamp", bg="midnightblue",

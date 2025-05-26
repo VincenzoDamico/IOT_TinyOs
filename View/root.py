@@ -31,6 +31,15 @@ class Root(tk.Tk):
 
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
+
+        Initial_message=tk.Frame(self.scrollable_frame, bg="midnightblue")
+
+        tk.Label(  Initial_message, text="Waiting for the sensor devices to connect....", bg="midnightblue",
+              font=("System", 30, "bold"), fg="ghostwhite").grid(
+            row=0, column=0, padx=50, pady=(70, 35))
+        Initial_message.pack(fill='both',expand=True)
+
+
         self.spacer = tk.Frame(self.scrollable_frame, height=100, bg="midnightblue")
         self.spacer.pack(side="bottom")
 
