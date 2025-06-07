@@ -2,6 +2,7 @@ import serial
 import re
 
 from Publisher.mqttPublisher import MQTTpublisher, addr_broker, port, topic
+import time
 
 SERIAL_PORT = 'COM3'
 BAUD_RATE = 115200
@@ -66,6 +67,8 @@ def leggi_e_processa_dati_seriale():
 
                         timestamp, node_id = key #per estrarre i due valori
 
+                        timestamp = int(time.time())
+
                         payloadPyt = {
                             "idSensor": node_id,
                             "timestamp": timestamp,
@@ -73,7 +76,7 @@ def leggi_e_processa_dati_seriale():
                         }
 
                         publisherMQTT.sendMessage(payloadPyt)
-
+                        
                         print(f"Aggiunto al dizionario: Chiave={key}, Dati={parsed_data}")
                     print("-" * 50)
 
