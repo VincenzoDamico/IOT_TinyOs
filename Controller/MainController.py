@@ -57,7 +57,7 @@ class SensorController:
                 humidity=  (0.0405+(-2.8E-6*humidity_raw))*humidity_raw -4 #https://emesystems.com/OLDSITE/OL2sht1x.htm la conversione lo presa da qua 
                 hum_round=round(humidity , 1)
 
-                time=self.timeCalculation(node_id,timestamp)
+                time=self.timeCalculation(node_id,timestamp)+"     "
             
                 key = (time, node_id)
 
