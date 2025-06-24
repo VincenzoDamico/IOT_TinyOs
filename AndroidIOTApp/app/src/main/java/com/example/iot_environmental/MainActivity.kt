@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -49,15 +51,23 @@ import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.rounded.Lock
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.sp
+import com.example.iot_environmental.ui.theme.Chartreuse
+import com.example.iot_environmental.ui.theme.ErrorColor
+import com.example.iot_environmental.ui.theme.LightBlue
+import com.example.iot_environmental.ui.theme.Navy
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -98,12 +108,16 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Login", fontSize = 24.sp, fontWeight = FontWeight.ExtraBold)
+        Image(
+            painter = painterResource(id = R.drawable.login),
+            contentDescription ="",
+            modifier = Modifier.requiredSize(250.dp)
+        )
         Spacer(modifier = Modifier.height(16.dp))
         TextField(value = email,
             onValueChange = { email = it },
             label = { Text(emailError.ifEmpty { "Email" },
-                color=if (emailError.isNotEmpty()) Color.Red else Color.Unspecified
+                color=if (emailError.isNotEmpty()) ErrorColor else Color.Unspecified
                 )},
             leadingIcon = {
                 Icon(
@@ -113,6 +127,11 @@ fun LoginScreen(
             },
             shape = RoundedCornerShape(8.dp),
             modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp, horizontal = 20.dp),
+            colors = TextFieldDefaults.colors(
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+
+            )
         )
         Spacer(modifier = Modifier.height(16.dp))
         TextField(value = password,
@@ -144,17 +163,54 @@ fun LoginScreen(
             },
             shape = RoundedCornerShape(8.dp),
             modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp, horizontal = 20.dp),
+            colors = TextFieldDefaults.colors(
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                )
         )
-
-
-        ElevatedButton(
-            modifier = Modifier.padding(vertical = 24.dp),
-            onClick = onContinueClicked
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 90.dp),
+            colors = ButtonDefaults.buttonColors( containerColor = MaterialTheme.colorScheme.primary),
+            onClick = {
+                    emailError= if (email.isEmpty()) "Email is required" else ""
+                    passwordError= if (password.isEmpty()) "Password is required" else ""
+                    if (emailError.isEmpty() && passwordError.isEmpty()) {
+                        onContinueClicked()
+                    }
+            }
         ) {
-            Text("Continue")
+            Text(text="Login",
+                color=Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.ExtraBold,
+            )
+
         }
+        Spacer(modifier = Modifier.height(16.dp))
+        Row(){
+            Text(text="Not a member? ",
+                color=if (isSystemInDarkTheme()) Color.White else Color.Black,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(text="Sing in now!",
+                color=MaterialTheme.colorScheme.primary,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.clickable {
+                    onContinueClicked()
+                }
+            )
+        }
+
+
+
     }
 }
+
+
+
 @Composable
 private fun NodesList(
     modifier: Modifier = Modifier,
@@ -204,21 +260,25 @@ private fun CardContent(name: String,isExpanded: Boolean, onToggleExpansion: () 
                 .weight(1f)
                 .padding(12.dp)
         ) {
-            Text(text = "Hello, ")
+            Text(text = "Hello, ", color=Color.White)
             Text(
                 text = name, style = MaterialTheme.typography.headlineMedium.copy(
-                    fontWeight = FontWeight.ExtraBold
+                    fontWeight = FontWeight.ExtraBold,
+                    color=Color.White
                 )
             )
             if (isExpanded) {
                 Text(
                     text = ("Composem ipsum color sit lazy, " +
                             "padding theme elit, sed do bouncy. ").repeat(4),
+                    color=Color.White
+
                 )
             }
         }
         IconButton(onClick = onToggleExpansion ){
             Icon(
+                tint=Color.White,
                 imageVector = if (isExpanded) Filled.ExpandLess else Filled.ExpandMore,
                 contentDescription = if (isExpanded) {
                     stringResource(R.string.show_less)

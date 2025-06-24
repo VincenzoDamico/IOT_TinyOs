@@ -20,12 +20,12 @@ private val DarkColorScheme = darkColorScheme(
     surface = Chartreuse,
     onSurface = Color.White,
     primary = LightBlue,
-    onPrimary = Blue
+    onPrimary = Navy
 )
 
 private val LightColorScheme = lightColorScheme(
     surface =LightBlue,
-    onSurface = Navy,
+    onSurface =Navy,
     primary = Chartreuse,
     onPrimary = Blue
 )
