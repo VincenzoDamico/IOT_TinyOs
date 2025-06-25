@@ -4,74 +4,20 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.Icons.Filled
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.example.iot_environmental.ui.theme.IOT_environmentalTheme
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.icons.rounded.Lock
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldColors
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight.Companion.Bold
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.sp
-import com.example.iot_environmental.ui.theme.Chartreuse
-import com.example.iot_environmental.ui.theme.ErrorColor
-import com.example.iot_environmental.ui.theme.LightBlue
-import com.example.iot_environmental.ui.theme.Navy
+import com.example.iot_environmental.ui.view.AppNavigator
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContent {
             IOT_environmentalTheme {
                 MyApp(modifier = Modifier.fillMaxSize())
@@ -81,214 +27,12 @@ class MainActivity : ComponentActivity() {
 }
 @Composable
 fun MyApp(modifier: Modifier = Modifier) {
-    var shouldShowOnboarding by rememberSaveable { mutableStateOf(true) }
-
-    Surface(modifier, color = MaterialTheme.colorScheme.background) {
-        if (shouldShowOnboarding) {
-            LoginScreen(onContinueClicked = { shouldShowOnboarding = false })
-        } else {
-            NodesList()
-        }
-    }
-}
-
-@Composable
-fun LoginScreen(
-    onContinueClicked: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    var email by remember { mutableStateOf("")}
-    var password by remember { mutableStateOf("")}
-    var passwordVisible by remember { mutableStateOf(false)}
-    var emailError by remember { mutableStateOf("")}
-    var passwordError by remember { mutableStateOf("")}
-
-    Column(
-        modifier = modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.login),
-            contentDescription ="",
-            modifier = Modifier.requiredSize(250.dp)
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        TextField(value = email,
-            onValueChange = { email = it },
-            label = { Text(emailError.ifEmpty { "Email" },
-                color=if (emailError.isNotEmpty()) ErrorColor else Color.Unspecified
-                )},
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Filled.Email,
-                    contentDescription = "Email Icon"
-                )
-            },
-            shape = RoundedCornerShape(8.dp),
-            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp, horizontal = 20.dp),
-            colors = TextFieldDefaults.colors(
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-
-            )
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        TextField(value = password,
-            onValueChange = { password = it },
-            label = { Text(passwordError.ifEmpty { "Password" },
-                color=if (passwordError.isNotEmpty()) Color.Red else Color.Unspecified
-            )},
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Rounded.Lock,
-                    contentDescription = "Password Icon"
-                )
-            },
-            visualTransformation = if(passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            trailingIcon ={
-                Icon(
-                    if (passwordVisible) {
-                        Icons.Filled.Visibility
-                    } else {
-                        Icons.Filled.VisibilityOff
-                    },
-                    contentDescription = "Toggle password visibility",
-                    modifier = Modifier
-                        .requiredSize(48.dp).padding(16.dp)
-                        .clickable { passwordVisible = !passwordVisible }
-                )
-
-
-            },
-            shape = RoundedCornerShape(8.dp),
-            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp, horizontal = 20.dp),
-            colors = TextFieldDefaults.colors(
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                )
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 90.dp),
-            colors = ButtonDefaults.buttonColors( containerColor = MaterialTheme.colorScheme.primary),
-            onClick = {
-                    emailError= if (email.isEmpty()) "Email is required" else ""
-                    passwordError= if (password.isEmpty()) "Password is required" else ""
-                    if (emailError.isEmpty() && passwordError.isEmpty()) {
-                        onContinueClicked()
-                    }
-            }
-        ) {
-            Text(text="Login",
-                color=Color.White,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.ExtraBold,
-            )
-
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        Row(){
-            Text(text="Not a member? ",
-                color=if (isSystemInDarkTheme()) Color.White else Color.Black,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-            )
-            Text(text="Sing in now!",
-                color=MaterialTheme.colorScheme.primary,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable {
-                    onContinueClicked()
-                }
-            )
-        }
-
-
-
+    Scaffold (modifier=modifier ,  containerColor = MaterialTheme.colorScheme.background) { innerPadding ->
+        AppNavigator(paddingValues = innerPadding)
     }
 }
 
 
-
-@Composable
-private fun NodesList(
-    modifier: Modifier = Modifier,
-    names: List<String> = List(1000) { "$it" }
-) {
-    LazyColumn(modifier = modifier.padding(vertical = 30.dp)) {
-        items(items = names)  { name ->
-            Node(
-                name = name
-            )
-        }
-    }
-}
-@Composable
-private fun Node(name: String, modifier: Modifier = Modifier) {
-    var isExpanded by rememberSaveable { mutableStateOf(false) }
-
-    Card(
-        colors =if (isExpanded)
-            CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onPrimary)
-        else
-            CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-
-        modifier = modifier.padding(vertical = 4.dp, horizontal = 8.dp)
-    ) {
-        CardContent(name, isExpanded = isExpanded, onToggleExpansion = {isExpanded = !isExpanded})
-    }
-}
-
-
-
-@Composable
-private fun CardContent(name: String,isExpanded: Boolean, onToggleExpansion: () -> Unit) {
-    Row(
-
-        modifier = Modifier
-            .padding(12.dp)
-            .animateContentSize(
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                    stiffness = Spring.StiffnessLow
-                )
-            )
-    ) {
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(12.dp)
-        ) {
-            Text(text = "Hello, ", color=Color.White)
-            Text(
-                text = name, style = MaterialTheme.typography.headlineMedium.copy(
-                    fontWeight = FontWeight.ExtraBold,
-                    color=Color.White
-                )
-            )
-            if (isExpanded) {
-                Text(
-                    text = ("Composem ipsum color sit lazy, " +
-                            "padding theme elit, sed do bouncy. ").repeat(4),
-                    color=Color.White
-
-                )
-            }
-        }
-        IconButton(onClick = onToggleExpansion ){
-            Icon(
-                tint=Color.White,
-                imageVector = if (isExpanded) Filled.ExpandLess else Filled.ExpandMore,
-                contentDescription = if (isExpanded) {
-                    stringResource(R.string.show_less)
-                } else {
-                    stringResource(R.string.show_more)
-                }
-            )
-        }
-    }
-}
 
 
 
@@ -297,13 +41,14 @@ private fun CardContent(name: String,isExpanded: Boolean, onToggleExpansion: () 
 @Composable
 fun DarkPreview() {
     IOT_environmentalTheme {
-        MyApp()
+        MyApp(modifier = Modifier.fillMaxSize())
+
     }
 }
 @Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp")
 @Composable
 fun LightPreview() {
     IOT_environmentalTheme {
-        MyApp()
+        MyApp(modifier = Modifier.fillMaxSize())
     }
 }
