@@ -1,6 +1,7 @@
 package com.example.iot_environmental.ui.view
 
 import android.util.Patterns
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -27,13 +28,17 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -45,23 +50,47 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.example.iot_environmental.AuthState
+import com.example.iot_environmental.AuthViewModel
 import com.example.iot_environmental.R
 import com.example.iot_environmental.ui.theme.ErrorColor
 
 @Composable
 fun RegisterScreen(
-    navController: NavController, paddingValues: PaddingValues
+    modifier: Modifier = Modifier,navController: NavController,authViewModel: AuthViewModel
 ){
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var passwordCheck by remember { mutableStateOf("") }
+    var email by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
+    var passwordCheck by rememberSaveable { mutableStateOf("") }
 
-    var passwordVisible by remember { mutableStateOf(false) }
-    var passwordCheckVisible by remember { mutableStateOf(false) }
+    var passwordVisible by rememberSaveable { mutableStateOf(false) }
+    var passwordCheckVisible by rememberSaveable { mutableStateOf(false) }
 
-    var emailError by remember { mutableStateOf("") }
-    var passwordError by remember { mutableStateOf("") }
-    var passwordCheckError by remember { mutableStateOf("") }
+    var emailError by rememberSaveable { mutableStateOf("") }
+    var passwordError by rememberSaveable { mutableStateOf("") }
+    var passwordCheckError by rememberSaveable { mutableStateOf("") }
+
+    val authState = authViewModel.authState.observeAsState()
+    val context = LocalContext.current
+
+    LaunchedEffect(authState.value) {
+        when (authState.value) {
+            is AuthState.Authenticated -> navController.navigate("home"){
+                popUpTo("register") {
+                    inclusive = true
+                }
+                popUpTo("login") {
+                    inclusive = true
+                }
+            }
+            is AuthState.Error -> Toast.makeText(
+                context,
+                (authState.value as AuthState.Error).message, Toast.LENGTH_SHORT
+            ).show()
+
+            else -> Unit
+        }
+    }
 
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.sign))
     val progress by animateLottieCompositionAsState(isPlaying = true, composition = composition, iterations = LottieConstants.IterateForever, speed = 0.7f)
@@ -69,14 +98,14 @@ fun RegisterScreen(
 
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(paddingValues).padding(16.dp),
+        modifier = modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         LottieAnimation(
-            modifier = Modifier.requiredSize(300.dp),
-            composition = composition,
-            progress = { progress }
+           modifier = Modifier.requiredSize(300.dp),
+               composition = composition,
+               progress = { progress }
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(text="Create an account",
@@ -190,10 +219,10 @@ fun RegisterScreen(
 
 
                 if (emailError.isEmpty() && passwordError.isEmpty()&& passwordCheckError.isEmpty()) {
-                    navController.navigate("login")
-
+                    authViewModel.signup(email, password)
                 }
-            }
+            }, enabled = authState.value != AuthState.Loading
+
         ) {
             Text(text="Sign up",
                 color= Color.White,

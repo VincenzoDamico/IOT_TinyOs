@@ -1,5 +1,6 @@
 package com.example.iot_environmental.ui.view
 
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -26,13 +27,17 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -44,23 +49,44 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.example.iot_environmental.AuthState
+import com.example.iot_environmental.AuthViewModel
 import com.example.iot_environmental.R
 import com.example.iot_environmental.ui.theme.ErrorColor
 
 @Composable
-fun LoginScreen(navController: NavController, paddingValues: PaddingValues){
-
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
-    var emailError by remember { mutableStateOf("") }
-    var passwordError by remember { mutableStateOf("") }
+fun LoginScreen(modifier: Modifier = Modifier,navController: NavController,authViewModel: AuthViewModel){
+    var email by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
+    var passwordVisible by rememberSaveable { mutableStateOf(false) }
+    var emailError by rememberSaveable { mutableStateOf("") }
+    var passwordError by rememberSaveable { mutableStateOf("") }
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.login))
     val progress by animateLottieCompositionAsState(isPlaying = true, composition = composition, iterations = LottieConstants.IterateForever, speed = 0.7f)
+    val authState = authViewModel.authState.observeAsState()
+    val context = LocalContext.current
 
+    LaunchedEffect(authState.value) {
+        when (authState.value) {
+            is AuthState.Authenticated -> navController.navigate("home"){
+                popUpTo("register") {
+                    inclusive = true
+                }
+                popUpTo("login") {
+                    inclusive = true
+                }
+            }
+            is AuthState.Error -> Toast.makeText(
+                context,
+                (authState.value as AuthState.Error).message, Toast.LENGTH_SHORT
+            ).show()
+
+            else -> Unit
+        }
+    }
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(paddingValues).padding(16.dp), // Your other screen-specific padding,
+        modifier = modifier.fillMaxSize().padding(16.dp), // Your other screen-specific padding,
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -135,11 +161,9 @@ fun LoginScreen(navController: NavController, paddingValues: PaddingValues){
                 emailError= if (email.isEmpty()) "Email is required" else ""
                 passwordError= if (password.isEmpty()) "Password is required" else ""
                 if (emailError.isEmpty() && passwordError.isEmpty()) {
-
-                    navController.navigate("home")
-
+                    authViewModel.login(email,password)
                 }
-            }
+            }, enabled = authState.value != AuthState.Loading
         ) {
             Text(text="Login",
                 color= Color.White,
