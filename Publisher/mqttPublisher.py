@@ -1,18 +1,16 @@
 import paho.mqtt.client as mqtt
 import json
 
-addr_broker = "localhost"
-port = 1883
-topic = "sensors/telosB"
 
 class MQTTpublisher:
-    def __init__(self, addr_broker, port, topic):
+    def __init__(self, addr_broker, port, topic,keepalive):
         self.addr_broker = addr_broker
         self.port = port
         self.topic = topic
-
+        self.keepalive = keepalive
         self.client = mqtt.Client()
-        self.client.connect(self.addr_broker, self.port, 60)
+        
+        self.client.connect(self.addr_broker, self.port, keepalive)
 
     
     def sendMessage(self, payload:dict):

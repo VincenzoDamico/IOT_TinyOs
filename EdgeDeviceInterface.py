@@ -1,14 +1,18 @@
-
 from Controller.MainController import SensorController
-from Models.MainModels import SensorModel
 from View.MainView import SensorView
 from View.root import Root
+from Publisher.mqttPublisher import MQTTpublisher
 
 if __name__ == "__main__":
+    
+    addr_broker = "localhost"
+    port = 1883
+    topic = "sensors/telosB"
+    keepalive=60
     app = Root()
-    model = SensorModel()
     view = SensorView(app)
-    controller = SensorController(model, view, app)
+    publisherMQTT= MQTTpublisher( addr_broker, port, topic,keepalive)
+    controller = SensorController(publisherMQTT, view, app)
     try:
         app.mainloop()
     except KeyboardInterrupt:

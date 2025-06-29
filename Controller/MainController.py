@@ -5,11 +5,11 @@ from datetime import datetime, timedelta
 
 
 class SensorController:
-    def __init__(self, model, view, root):
-        self.model = model
+    def __init__(self, publisherMQTT, view, root):
+        self.publisherMQTT = publisherMQTT
         self.view = view
         self.root = root
-        self.first_timestamp = {}
+        self.previous_uptime = {}
 
         self.pattern = re.compile(
             r"id.*?:\s*.*?(\d+).*?"
@@ -24,22 +24,26 @@ class SensorController:
         self.thread = threading.Thread(target=self.read_serial_loop, daemon=True)
         self.thread.start()
 
-    def timeCalculation(self, node_id,timestamp):
-
-        if node_id not in self.first_timestamp:
-            self.first_timestamp[node_id] = timestamp
-            self.view.add_sensor_frame(node_id)
-
-        base_time = self.first_timestamp[node_id]
-
-        if ( base_time >=  timestamp) :
-            self.first_timestamp[node_id] = timestamp
-            base_time = self.first_timestamp[node_id]
-
+    def timeCalculation(self, node_id,uptime):
         now = datetime.now()
-        delta = timedelta(milliseconds= (timestamp - base_time))
-        time = now + delta
-        return time.strftime("%H:%M:%S")
+
+        if node_id not in self.previous_uptime:
+            self.previous_uptime[node_id] =uptime
+            self.view.add_sensor_frame(node_id)
+            return now.strftime("%Y-%m-%d\n%H:%M:%S")
+        
+        previous_uptime=self.previous_uptime[node_id]
+
+        if ( uptime <=  previous_uptime) :
+            self.previous_uptime[node_id] =uptime
+            return now.strftime("%Y-%m-%d\n%H:%M:%S")
+
+        generetionTime = uptime-previous_uptime
+
+        time = now-timedelta(milliseconds= (generetionTime))
+        self.previous_uptime[node_id] =uptime
+
+        return time.strftime("%Y-%m-%d\n%H:%M:%S")
     
 
     def parse_line(self, line):
@@ -50,22 +54,28 @@ class SensorController:
                 temp_raw = int(match.group(2))
                 humidity_raw = int(match.group(3))
                 luminosity = int(match.group(4))
-                timestamp = int(match.group(5))
+                uptime = int(match.group(5))
                 
 
                 temperature = temp_raw / 10.0
                 humidity=  (0.0405+(-2.8E-6*humidity_raw))*humidity_raw -4 #https://emesystems.com/OLDSITE/OL2sht1x.htm la conversione lo presa da qua 
                 hum_round=round(humidity , 1)
 
-                time=self.timeCalculation(node_id,timestamp)
+                time=self.timeCalculation(node_id,uptime)
             
-                key = (time, node_id)
-
-                self.model.update_data(key, {
+                parsed_data = {
                     "temperature": temperature,
                     "humidity": hum_round,
                     "luminosity": luminosity
-                })
+                }
+
+                payloadPyt = {
+                            "idSensor": node_id,
+                            "timestamp": time.replace("\n","_"),
+                            **parsed_data
+                        }
+                #sostituisco il model con influxdb collegato via node red
+                self.publisherMQTT.sendMessage(payloadPyt)
 
                 self.root.after(0, self.view.update_sensor_frame, node_id, temperature, hum_round, luminosity, time )
 
