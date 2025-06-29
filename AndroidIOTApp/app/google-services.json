@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "106311061580",
+    "firebase_url": "https://iot-environmental-14e42-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "iot-environmental-14e42",
+    "storage_bucket": "iot-environmental-14e42.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:106311061580:android:98c6859d0ddea6da2ca4e9",
+        "android_client_info": {
+          "package_name": "com.example.iot_environmental"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD_ulzgMYTJgEoKLtGQeZcRQdm7RJwR-Aw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

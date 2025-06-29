@@ -1,5 +1,5 @@
+// com.example.iot_environmental.ui.view.HomeScreen.kt
 package com.example.iot_environmental.ui.view
-
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -52,9 +52,8 @@ import com.example.iot_environmental.R
 fun HomeScreen(modifier: Modifier = Modifier,navController: NavController,authViewModel: AuthViewModel
 ) {
     val authState = authViewModel.authState.observeAsState()
-    //names: List<Friend> = emptyList()
+//names: List<Friend> = emptyList()
     var names = List(1000) { "$it" }
-
     LaunchedEffect(authState.value) {
         when (authState.value) {
             is AuthState.Unauthenticated -> navController.navigate("login") {
@@ -62,12 +61,11 @@ fun HomeScreen(modifier: Modifier = Modifier,navController: NavController,authVi
                     inclusive = true
                 }
             }
-
             else -> Unit
         }
     }
     Column(modifier.fillMaxSize().padding(16.dp),
-    horizontalAlignment = Alignment.CenterHorizontally) {
+        horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = "Node list",
             fontSize = 24.sp,
@@ -78,8 +76,6 @@ fun HomeScreen(modifier: Modifier = Modifier,navController: NavController,authVi
             modifier = Modifier.fillMaxSize().padding(vertical = 8.dp).weight(1f),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-
             items(items = names) { name ->
                 Node(
                     name = name
@@ -87,81 +83,74 @@ fun HomeScreen(modifier: Modifier = Modifier,navController: NavController,authVi
             }
         }
         ElevatedButton( colors=ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary), onClick = {
-                authViewModel.signout()
-            }) {
-                Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp)) {  Icon(painter = painterResource(id = R.drawable.exiticon), modifier = Modifier.height(25.dp) // Set height same as the text
-                    .wrapContentWidth(), contentDescription = "Logout", tint = Color.White)
-                    Spacer(modifier = Modifier.padding(horizontal = 10.dp))
-                    Text(text = "Sign out", fontSize = 20.sp, color = Color.White)}
+            authViewModel.signout()
+        }) {
+            Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp)) { Icon(painter = painterResource(id = R.drawable.exiticon), modifier = Modifier.height(25.dp) // Set height same as the text
+                .wrapContentWidth(), contentDescription = "Logout", tint = Color.White)
+                Spacer(modifier = Modifier.padding(horizontal = 10.dp))
+                Text(text = "Sign out", fontSize = 20.sp, color = Color.White)}
 
-            }
         }
+    }
 
 }
 
 
-    @Composable
-     fun Node(name: String, modifier: Modifier = Modifier) {
-        var isExpanded by rememberSaveable { mutableStateOf(false) }
-
-        Card(
-            colors =if (isExpanded)
-                CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onPrimary)
-            else
-                CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-
-            modifier = modifier.padding(vertical = 4.dp, horizontal = 8.dp)
-        ) {
-            CardContent(name, isExpanded = isExpanded, onToggleExpansion = {isExpanded = !isExpanded})
-        }
+@Composable
+fun Node(name: String, modifier: Modifier = Modifier) {
+    var isExpanded by rememberSaveable { mutableStateOf(false) }
+    Card(
+        colors =if (isExpanded)
+            CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onPrimary)
+        else
+            CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        modifier = modifier.padding(vertical = 4.dp, horizontal = 8.dp)
+    ) {
+        CardContent(name, isExpanded = isExpanded, onToggleExpansion = {isExpanded = !isExpanded})
     }
-
-
-
-    @Composable
-    fun CardContent(name: String,isExpanded: Boolean, onToggleExpansion: () -> Unit) {
-        Row(
-
+}
+@Composable
+fun CardContent(name: String,isExpanded: Boolean, onToggleExpansion: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .padding(12.dp)
+            .animateContentSize(
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessLow
+                )
+            )
+    ) {
+        Column(
             modifier = Modifier
+                .weight(1f)
                 .padding(12.dp)
-                .animateContentSize(
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                        stiffness = Spring.StiffnessLow
-                    )
-                )
         ) {
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(12.dp)
-            ) {
-                Text(text = "Hello, ", color= Color.White)
-                Text(
-                    text = name, style = MaterialTheme.typography.headlineMedium.copy(
-                        fontWeight = FontWeight.ExtraBold,
-                        color= Color.White
-                    )
+            Text(text = "Hello, ", color= Color.White)
+            Text(
+                text = name, style = MaterialTheme.typography.headlineMedium.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    color= Color.White
                 )
-                if (isExpanded) {
-                    Text(
-                        text = ("Composem ipsum color sit lazy, " +
-                                "padding theme elit, sed do bouncy. ").repeat(4),
-                        color= Color.White
-
-                    )
-                }
-            }
-            IconButton(onClick = onToggleExpansion ){
-                Icon(
-                    tint= Color.White,
-                    imageVector = if (isExpanded) Filled.ExpandLess else Filled.ExpandMore,
-                    contentDescription = if (isExpanded) {
-                        stringResource(R.string.show_less)
-                    } else {
-                        stringResource(R.string.show_more)
-                    }
+            )
+            if (isExpanded) {
+                Text(
+                    text = ("Composem ipsum color sit lazy, " +
+                          "padding theme elit, sed do bouncy. ").repeat(4),
+                    color= Color.White
                 )
             }
         }
+        IconButton(onClick = onToggleExpansion ){
+            Icon(
+                tint= Color.White,
+                imageVector = if (isExpanded) Filled.ExpandLess else Filled.ExpandMore,
+                contentDescription = if (isExpanded) {
+                    stringResource(R.string.show_less)
+                } else {
+                    stringResource(R.string.show_more)
+                }
+            )
+        }
     }
+}
