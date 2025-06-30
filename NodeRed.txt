@@ -1,0 +1,269 @@
+[
+    {
+        "id": "4524aab60525fcb7",
+        "type": "tab",
+        "label": "Project IoT",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "4a87be5aaf844852",
+        "type": "mqtt in",
+        "z": "4524aab60525fcb7",
+        "name": "",
+        "topic": "sensors/telosB",
+        "qos": "1",
+        "datatype": "auto-detect",
+        "broker": "407a01e4.6b637",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 300,
+        "y": 280,
+        "wires": [
+            [
+                "50c8f83d9f7083a5",
+                "0e2c08d6304d7705"
+            ]
+        ]
+    },
+    {
+        "id": "0e2c08d6304d7705",
+        "type": "debug",
+        "z": "4524aab60525fcb7",
+        "name": "debug 5",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 540,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "50c8f83d9f7083a5",
+        "type": "function",
+        "z": "4524aab60525fcb7",
+        "name": "function",
+        "func": "let message = msg.payload;\n\nmsg.payload = [\n        { \n            idSensor: message.idSensor,\n            timestamp: message.timestamp\n        },\n        {\n            temperature: message.temperature,\n            humidity: message.humidity,\n            luminosity: message.luminosity\n        },    \n];\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 520,
+        "y": 280,
+        "wires": [
+            [
+                "0c554a70633a6a62",
+                "37bf02a76c09f6ef"
+            ]
+        ]
+    },
+    {
+        "id": "bb43e5d067244b41",
+        "type": "influxdb out",
+        "z": "4524aab60525fcb7",
+        "influxdb": "6573189d2962e519",
+        "name": "InfluxDB",
+        "measurement": "sensors",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "organisation",
+        "bucket": "bucket",
+        "x": 880,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "0c554a70633a6a62",
+        "type": "debug",
+        "z": "4524aab60525fcb7",
+        "name": "debug 6",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 640,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "37bf02a76c09f6ef",
+        "type": "link out",
+        "z": "4524aab60525fcb7",
+        "name": "link out 1",
+        "mode": "link",
+        "links": [
+            "be9ca095ff6d4281",
+            "aa72c25775608b20"
+        ],
+        "x": 685,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "be9ca095ff6d4281",
+        "type": "link in",
+        "z": "4524aab60525fcb7",
+        "name": "link in 1",
+        "links": [
+            "37bf02a76c09f6ef"
+        ],
+        "x": 855,
+        "y": 300,
+        "wires": [
+            [
+                "bb43e5d067244b41",
+                "24807bb73fab8244"
+            ]
+        ]
+    },
+    {
+        "id": "24807bb73fab8244",
+        "type": "debug",
+        "z": "4524aab60525fcb7",
+        "name": "debug 7",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1040,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "aa72c25775608b20",
+        "type": "link in",
+        "z": "4524aab60525fcb7",
+        "name": "link in 2",
+        "links": [
+            "37bf02a76c09f6ef"
+        ],
+        "x": 855,
+        "y": 180,
+        "wires": [
+            [
+                "7c612d580d6354bf"
+            ]
+        ]
+    },
+    {
+        "id": "7c612d580d6354bf",
+        "type": "function",
+        "z": "4524aab60525fcb7",
+        "name": "function Firebase",
+        "func": "let message1 = msg.payload[0];\nlet message2 = msg.payload[1];\n\nlet message = { ...message1, ...message2}     //unisce le due parti sopra\n\nmsg.payload = {\n    temperature: message.temperature,\n    humidity: message.humidity,\n    luminosity: message.luminosity,\n    //timestamp: message.timestamp,\n    //idSensor: message.idSensor\n};\n\nmsg.url = \"https://iot-environmental-14e42-default-rtdb.europe-west1.firebasedatabase.app/baseStation/2/\"+\n    message.idSensor + \"/\" + message.timestamp+\".json\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1050,
+        "y": 180,
+        "wires": [
+            [
+                "57c64e382f7aec1b",
+                "8e639f35a6d1fc05"
+            ]
+        ]
+    },
+    {
+        "id": "57c64e382f7aec1b",
+        "type": "debug",
+        "z": "4524aab60525fcb7",
+        "name": "debug 8",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1200,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "8e639f35a6d1fc05",
+        "type": "http request",
+        "z": "4524aab60525fcb7",
+        "name": "",
+        "method": "PUT",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "{{{url}}}",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 1210,
+        "y": 140,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "407a01e4.6b637",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "localhost",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "6573189d2962e519",
+        "type": "influxdb",
+        "hostname": "localhost",
+        "port": "8086",
+        "protocol": "http",
+        "database": "sensors",
+        "name": "InfluxDB",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "1.x",
+        "url": "http://localhost:8086",
+        "timeout": "10",
+        "rejectUnauthorized": true
+    }
+]
