@@ -20,14 +20,22 @@ private val DarkColorScheme = darkColorScheme(
     surface = Chartreuse,
     onSurface = Color.White,
     primary = LightBlue,
-    onPrimary = Navy
+    onPrimary = Navy,
+    secondaryContainer= LightBlue,
+    onSecondaryContainer = Chartreuse,
+    primaryContainer= SuperLightBlue,
+    onPrimaryContainer = Color.White,
 )
 
 private val LightColorScheme = lightColorScheme(
     surface =LightBlue,
     onSurface =Navy,
     primary = Chartreuse,
-    onPrimary = Blue
+    onPrimary = Blue,
+    secondaryContainer= SuperLightBlue,
+    onSecondaryContainer =  Chartreuse,
+    primaryContainer= SuperLightGray,
+    onPrimaryContainer = ChartreuseLight,
 )
 
 @Composable
