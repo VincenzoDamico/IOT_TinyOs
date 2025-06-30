@@ -1,12 +1,13 @@
 // com.example.iot_environmental.ui.view.HomeScreen.kt
 package com.example.iot_environmental.ui.view
+
+import android.content.res.Configuration
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,7 +28,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -48,12 +49,20 @@ import com.example.iot_environmental.AuthState
 import com.example.iot_environmental.AuthViewModel
 import com.example.iot_environmental.R
 
+import androidx.lifecycle.viewmodel.compose.viewModel // For ViewModel injection
+import com.example.iot_environmental.ui.data.BaseStationData
+import com.example.iot_environmental.ui.data.NodeData
+
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier,navController: NavController,authViewModel: AuthViewModel
+fun HomeScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    authViewModel: AuthViewModel = viewModel(), // Provide default instance for preview/testing
+    firebaseViewModel: FirebaseViewModel = viewModel() // Inject FirebaseViewModel
 ) {
     val authState = authViewModel.authState.observeAsState()
-//names: List<Friend> = emptyList()
-    var names = List(1000) { "$it" }
+    val baseStationsData by firebaseViewModel.allBaseStationsData.observeAsState(initial = emptyList()) // Observe Firebase data
+
     LaunchedEffect(authState.value) {
         when (authState.value) {
             is AuthState.Unauthenticated -> navController.navigate("login") {
@@ -64,93 +73,157 @@ fun HomeScreen(modifier: Modifier = Modifier,navController: NavController,authVi
             else -> Unit
         }
     }
-    Column(modifier.fillMaxSize().padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = "Node list",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)
-        )
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+
+
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(vertical = 8.dp).weight(1f),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(vertical = 8.dp)
+                .weight(1f),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            items(items = names) { name ->
-                Node(
-                    name = name
-                )
+            item {  Text(
+                text = "Node List",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 10.dp, bottom = 20.dp)
+            ) }
+            if (baseStationsData.isEmpty()) {
+                item {
+                    Text(text = "No data available from Firebase yet.", color = if (isSystemInDarkTheme())Color.White else Color.Black)
+                }
+            } else {
+                items(baseStationsData) { baseStation ->
+                    BaseStationCard(baseStation = baseStation)
+                    Spacer(modifier = Modifier.height(16.dp)) // Spacer between base stations
+                }
             }
         }
-        ElevatedButton( colors=ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary), onClick = {
-            authViewModel.signout()
-        }) {
-            Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp)) { Icon(painter = painterResource(id = R.drawable.exiticon), modifier = Modifier.height(25.dp) // Set height same as the text
-                .wrapContentWidth(), contentDescription = "Logout", tint = Color.White)
-                Spacer(modifier = Modifier.padding(horizontal = 10.dp))
-                Text(text = "Sign out", fontSize = 20.sp, color = Color.White)}
 
+        ElevatedButton(
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+            onClick = {
+                authViewModel.signout()
+            }
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 5.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.exiticon),
+                    modifier = Modifier
+                        .height(25.dp)
+                        .wrapContentWidth(),
+                    contentDescription = "Logout",
+                    tint = Color.White
+                )
+                Spacer(modifier = Modifier.padding(horizontal = 10.dp))
+                Text(text = "Sign out", fontSize = 20.sp, color = Color.White)
+            }
         }
     }
-
 }
 
-
 @Composable
-fun Node(name: String, modifier: Modifier = Modifier) {
-    var isExpanded by rememberSaveable { mutableStateOf(false) }
+fun BaseStationCard(baseStation: BaseStationData, modifier: Modifier = Modifier) {
     Card(
-        colors =if (isExpanded)
-            CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onPrimary)
-        else
-            CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        modifier = modifier.padding(vertical = 4.dp, horizontal = 8.dp)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp, horizontal = 8.dp)
     ) {
-        CardContent(name, isExpanded = isExpanded, onToggleExpansion = {isExpanded = !isExpanded})
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(
+                text = "Base Station: ${baseStation.baseStationId}",
+                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                color = Color.White
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            if (baseStation.nodes.isEmpty()) {
+                Text(text = "No nodes found for this base station.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            } else {
+                baseStation.nodes.forEach { node ->
+                    NodeDataCard(node = node)
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
+            }
+        }
     }
 }
+
 @Composable
-fun CardContent(name: String,isExpanded: Boolean, onToggleExpansion: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .padding(12.dp)
-            .animateContentSize(
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                    stiffness = Spring.StiffnessLow
-                )
-            )
+fun NodeDataCard(node: NodeData, modifier: Modifier = Modifier) {
+    var isExpanded by rememberSaveable { mutableStateOf(false) }
+
+    Card(
+        colors = if (isExpanded)
+            CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+        else
+            CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
     ) {
         Column(
             modifier = Modifier
-                .weight(1f)
                 .padding(12.dp)
-        ) {
-            Text(text = "Hello, ", color= Color.White)
-            Text(
-                text = name, style = MaterialTheme.typography.headlineMedium.copy(
-                    fontWeight = FontWeight.ExtraBold,
-                    color= Color.White
+                .animateContentSize(
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessLow
+                    )
                 )
-            )
-            if (isExpanded) {
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
                 Text(
-                    text = ("Composem ipsum color sit lazy, " +
-                          "padding theme elit, sed do bouncy. ").repeat(4),
-                    color= Color.White
+                    text = "Node ID: ${node.nodeId}",
+                    style = MaterialTheme.typography.titleMedium,
+                    color =if (!isExpanded) MaterialTheme.colorScheme.onPrimaryContainer else  MaterialTheme.colorScheme.onSecondaryContainer
+                )
+                IconButton(onClick = { isExpanded = !isExpanded }) {
+                    Icon(
+                        imageVector = if (isExpanded) Filled.ExpandLess else Filled.ExpandMore,
+                        contentDescription = if (isExpanded) stringResource(R.string.show_less) else stringResource(R.string.show_more),
+                        tint = if (!isExpanded) MaterialTheme.colorScheme.onPrimaryContainer else  MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                }
+            }
+            if (isExpanded) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Timestamp: ${node.timestamp}",
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+                Text(
+                    text = "Temperature: ${node.reading.temperature}°C",
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+                Text(
+                    text = "Humidity: ${node.reading.humidity}%",
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+                Text(
+                    text = "Luminosity: ${node.reading.luminosity}",
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
             }
         }
-        IconButton(onClick = onToggleExpansion ){
-            Icon(
-                tint= Color.White,
-                imageVector = if (isExpanded) Filled.ExpandLess else Filled.ExpandMore,
-                contentDescription = if (isExpanded) {
-                    stringResource(R.string.show_less)
-                } else {
-                    stringResource(R.string.show_more)
-                }
-            )
-        }
     }
 }
+

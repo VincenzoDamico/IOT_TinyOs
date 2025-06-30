@@ -343,7 +343,7 @@ private fun RegisterLandscapeLayout(
     Row(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
@@ -360,7 +360,7 @@ private fun RegisterLandscapeLayout(
             Text(
                 text = "Create an account",
                 color = MaterialTheme.colorScheme.primary,
-                fontSize = 25.sp,
+                fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
@@ -383,7 +383,7 @@ private fun RegisterLandscapeLayout(
                 shape = RoundedCornerShape(8.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 4.dp, horizontal = 20.dp),
+                    .padding(horizontal = 20.dp),
                 colors = TextFieldDefaults.colors(
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
@@ -426,7 +426,7 @@ private fun RegisterLandscapeLayout(
                 shape = RoundedCornerShape(8.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 4.dp, horizontal = 20.dp),
+                    .padding( horizontal = 20.dp),
                 colors = TextFieldDefaults.colors(
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
@@ -468,13 +468,13 @@ private fun RegisterLandscapeLayout(
                 shape = RoundedCornerShape(8.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 4.dp, horizontal = 20.dp),
+                    .padding( horizontal = 20.dp),
                 colors = TextFieldDefaults.colors(
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
                 )
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
             Button(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -512,7 +512,7 @@ private fun RegisterLandscapeLayout(
                 )
 
             }
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
             Row(modifier = Modifier.padding(horizontal = 20.dp)) {
                 Text(
                     text = "Already have an account? ",
