@@ -219,7 +219,7 @@ fun NodeDataCard(node: NodeData, modifier: Modifier = Modifier) {
                     color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
                 Text(
-                    text = "Luminosity: ${node.reading.luminosity}",
+                    text = "Luminosity: ${node.reading.luminosity}lx",
                     color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
             }
