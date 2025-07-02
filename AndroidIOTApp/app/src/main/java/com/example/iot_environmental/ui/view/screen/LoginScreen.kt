@@ -1,13 +1,11 @@
-package com.example.iot_environmental.ui.view
+package com.example.iot_environmental.ui.view.screen
 
 import android.content.res.Configuration
-import android.util.Patterns
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,7 +24,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -35,10 +32,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -47,7 +40,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -58,25 +50,23 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
-import com.example.iot_environmental.AppNavigator
-import com.example.iot_environmental.AuthState
-import com.example.iot_environmental.AuthViewModel
 import com.example.iot_environmental.R
 import com.example.iot_environmental.ui.theme.ErrorColor
-import com.example.iot_environmental.ui.theme.IOT_environmentalTheme
+import com.example.iot_environmental.ui.view.model.AuthState
+import com.example.iot_environmental.ui.view.model.AuthViewModel
+import com.example.iot_environmental.ui.view.model.LogicViewModel
 
 @Composable
-fun RegisterScreen(
-    modifier: Modifier = Modifier,navController: NavController,authViewModel: AuthViewModel,registerViewModel:RegisterViewModel= viewModel()
-) {
+fun LoginScreen(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel, logicViewModel: LogicViewModel = viewModel()){
 
-
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.login))
+    val progress by animateLottieCompositionAsState(isPlaying = true, composition = composition, iterations = LottieConstants.IterateForever, speed = 0.7f)
     val authState = authViewModel.authState.observeAsState()
     val context = LocalContext.current
 
     LaunchedEffect(authState.value) {
         when (authState.value) {
-            is AuthState.Authenticated -> navController.navigate("home") {
+            is AuthState.Authenticated -> navController.navigate("home"){
                 popUpTo("register") {
                     inclusive = true
                 }
@@ -84,7 +74,6 @@ fun RegisterScreen(
                     inclusive = true
                 }
             }
-
             is AuthState.Error -> Toast.makeText(
                 context,
                 (authState.value as AuthState.Error).message, Toast.LENGTH_SHORT
@@ -93,47 +82,39 @@ fun RegisterScreen(
             else -> Unit
         }
     }
-
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.sign))
-    val progress by animateLottieCompositionAsState(
-        isPlaying = true,
-        composition = composition,
-        iterations = LottieConstants.IterateForever,
-        speed = 0.7f
-    )
-
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     if (isLandscape) {
-        RegisterLandscapeLayout(
+        LoginLandscapeLayout(
             modifier,
             composition,
             progress,
-            registerViewModel,
-            authViewModel,
-            authState,
-            navController
-        )
-
-    }else {
-        RegisterPortraitLayout(
-            modifier,
-            composition,
-            progress,
-            registerViewModel,
+            logicViewModel,
             authViewModel,
             authState,
             navController
         )
     }
+    else{
+        LoginPortraitLayout(
+            modifier,
+            composition,
+            progress,
+            logicViewModel,
+            authViewModel,
+            authState,
+            navController
+        )
+
+    }
 }
 
 @Composable
-private fun RegisterPortraitLayout(
+private fun LoginPortraitLayout(
     modifier: Modifier,
     composition: LottieComposition?,
     progress: Float,
-    registerViewModel: RegisterViewModel,
+    logicViewModel: LogicViewModel,
     authViewModel: AuthViewModel,
     authState: State<AuthState?>,
     navController: NavController
@@ -141,7 +122,7 @@ private fun RegisterPortraitLayout(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(16.dp), // Your other screen-specific padding,
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -150,22 +131,15 @@ private fun RegisterPortraitLayout(
             composition = composition,
             progress = { progress }
         )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Create an account",
-            color = MaterialTheme.colorScheme.primary,
-            fontSize = 25.sp,
-            fontWeight = FontWeight.Bold,
 
-            )
         Spacer(modifier = Modifier.height(16.dp))
         TextField(
-            value = registerViewModel.email.value,
-            onValueChange = { registerViewModel.setEmail(it) },
+            value = logicViewModel.email.value,
+            onValueChange = { logicViewModel.setEmail(it) },
             label = {
                 Text(
-                    registerViewModel.emailError.value.ifEmpty { "Email" },
-                    color = if (registerViewModel.emailError.value.isNotEmpty()) ErrorColor else Color.Unspecified
+                    logicViewModel.emailError.value.ifEmpty { "Email" },
+                    color = if (logicViewModel.emailError.value.isNotEmpty()) ErrorColor else Color.Unspecified
                 )
             },
             leadingIcon = {
@@ -186,12 +160,12 @@ private fun RegisterPortraitLayout(
         )
         Spacer(modifier = Modifier.height(16.dp))
         TextField(
-            value = registerViewModel.password.value,
-            onValueChange = { registerViewModel.setPassword(it) },
+            value = logicViewModel.password.value,
+            onValueChange = { logicViewModel.setPassword(it) },
             label = {
                 Text(
-                    registerViewModel.passwordError.value.ifEmpty { "Password" },
-                    color = if (registerViewModel.passwordError.value.isNotEmpty()) Color.Red else Color.Unspecified
+                    logicViewModel.passwordError.value.ifEmpty { "Password" },
+                    color = if (logicViewModel.passwordError.value.isNotEmpty()) Color.Red else Color.Unspecified
                 )
             },
             leadingIcon = {
@@ -200,10 +174,10 @@ private fun RegisterPortraitLayout(
                     contentDescription = "Password Icon"
                 )
             },
-            visualTransformation = if (registerViewModel.passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
+            visualTransformation = if (logicViewModel.passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 Icon(
-                    if (registerViewModel.passwordVisible.value) {
+                    if (logicViewModel.passwordVisible.value) {
                         Icons.Filled.Visibility
                     } else {
                         Icons.Filled.VisibilityOff
@@ -212,49 +186,7 @@ private fun RegisterPortraitLayout(
                     modifier = Modifier
                         .requiredSize(48.dp)
                         .padding(16.dp)
-                        .clickable { registerViewModel.setPasswordVisible(!registerViewModel.passwordVisible.value) }
-                )
-
-
-            },
-            shape = RoundedCornerShape(8.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp, horizontal = 20.dp),
-            colors = TextFieldDefaults.colors(
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-            )
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        TextField(
-            value = registerViewModel.passwordCheck.value,
-            onValueChange = { registerViewModel.setPasswordCheck(it) },
-            label = {
-                Text(
-                    registerViewModel.passwordCheckError.value.ifEmpty { "Password Confirmation" },
-                    color = if (registerViewModel.passwordCheckError.value.isNotEmpty()) Color.Red else Color.Unspecified
-                )
-            },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Rounded.Lock,
-                    contentDescription = "Password Icon"
-                )
-            },
-            visualTransformation = if (registerViewModel.passwordCheckVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
-            trailingIcon = {
-                Icon(
-                    if (registerViewModel.passwordCheckVisible.value) {
-                        Icons.Filled.Visibility
-                    } else {
-                        Icons.Filled.VisibilityOff
-                    },
-                    contentDescription = "Toggle password visibility",
-                    modifier = Modifier
-                        .requiredSize(48.dp)
-                        .padding(16.dp)
-                        .clickable { registerViewModel.setPasswordCheckVisible(!registerViewModel.passwordCheckVisible.value) }
+                        .clickable { logicViewModel.setPasswordVisible(!logicViewModel.passwordVisible.value) }
                 )
 
 
@@ -272,35 +204,18 @@ private fun RegisterPortraitLayout(
         Button(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 90.dp),
+                .padding(horizontal = 20.dp),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             onClick = {
-                registerViewModel.setEmailError(
-                    if (registerViewModel.email.value.isEmpty()) "Email is required" else if (!Patterns.EMAIL_ADDRESS.matcher(
-                            registerViewModel.email.value
-                        ).matches()
-                    ) "Email is not valid" else ""
-                )
-
-                registerViewModel.setPasswordError(if (registerViewModel.password.value.isEmpty()) "Password is required" else "")
-                registerViewModel.setPasswordCheckError(
-                    if (registerViewModel.passwordCheck.value.isEmpty()) "Password confirmation is required" else
-                        if (registerViewModel.passwordCheck.value != (registerViewModel.password.value)) "Password do not match" else ""
-                )
-
-
-                if (registerViewModel.emailError.value.isEmpty() && registerViewModel.passwordError.value.isEmpty() && registerViewModel.passwordCheckError.value.isEmpty()) {
-                    authViewModel.signup(
-                        registerViewModel.email.value,
-                        registerViewModel.password.value
-                    )
+                logicViewModel.setEmailError(if (logicViewModel.email.value.isEmpty()) "Email is required" else "")
+                logicViewModel.setPasswordError(if (logicViewModel.password.value.isEmpty()) "Password is required" else "")
+                if (logicViewModel.emailError.value.isEmpty() && logicViewModel.passwordError.value.isEmpty()) {
+                    authViewModel.login(logicViewModel.email.value, logicViewModel.password.value)
                 }
             }, enabled = authState.value != AuthState.Loading
-
-
         ) {
             Text(
-                text = "Sign up",
+                text = "Login",
                 color = Color.White,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.ExtraBold,
@@ -308,34 +223,32 @@ private fun RegisterPortraitLayout(
 
         }
         Spacer(modifier = Modifier.height(16.dp))
-        Row(horizontalArrangement = Arrangement.Center) {
+        Row() {
             Text(
-                text = "Already have an account? ",
+                text = "Not a member? ",
                 color = if (isSystemInDarkTheme()) Color.White else Color.Gray,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
             )
             Text(
-                text = "Login!",
+                text = "Sing up now!",
                 color = MaterialTheme.colorScheme.primary,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.clickable {
-                    navController.navigate("login")
+                    navController.navigate("register")
                 }
             )
         }
-
-
     }
 }
 
 @Composable
-private fun RegisterLandscapeLayout(
+private fun LoginLandscapeLayout(
     modifier: Modifier,
     composition: LottieComposition?,
     progress: Float,
-    registerViewModel: RegisterViewModel,
+    logicViewModel: LogicViewModel,
     authViewModel: AuthViewModel,
     authState: State<AuthState?>,
     navController: NavController
@@ -343,7 +256,7 @@ private fun RegisterLandscapeLayout(
     Row(
         modifier = modifier
             .fillMaxSize()
-            .padding(8.dp),
+            .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
@@ -358,20 +271,22 @@ private fun RegisterLandscapeLayout(
             verticalArrangement = Arrangement.Center,
         ) {
             Text(
-                text = "Create an account",
+                text = "Login",
                 color = MaterialTheme.colorScheme.primary,
-                fontSize = 20.sp,
+                fontSize = 25.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 20.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             TextField(
-                value = registerViewModel.email.value,
-                onValueChange = { registerViewModel.setEmail(it) },
+                value = logicViewModel.email.value,
+                onValueChange = { logicViewModel.setEmail(it) },
                 label = {
                     Text(
-                        registerViewModel.emailError.value.ifEmpty { "Email" },
-                        color = if (registerViewModel.emailError.value.isNotEmpty()) ErrorColor else Color.Unspecified
+                        logicViewModel.emailError.value.ifEmpty { "Email" },
+                        color = if (logicViewModel.emailError.value.isNotEmpty()) ErrorColor else Color.Unspecified
                     )
                 },
                 leadingIcon = {
@@ -383,21 +298,21 @@ private fun RegisterLandscapeLayout(
                 shape = RoundedCornerShape(8.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
+                    .padding(vertical = 4.dp, horizontal = 20.dp),
                 colors = TextFieldDefaults.colors(
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
 
                     )
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             TextField(
-                value = registerViewModel.password.value,
-                onValueChange = { registerViewModel.setPassword(it) },
+                value = logicViewModel.password.value,
+                onValueChange = { logicViewModel.setPassword(it) },
                 label = {
                     Text(
-                        registerViewModel.passwordError.value.ifEmpty { "Password" },
-                        color = if (registerViewModel.passwordError.value.isNotEmpty()) Color.Red else Color.Unspecified
+                        logicViewModel.passwordError.value.ifEmpty { "Password" },
+                        color = if (logicViewModel.passwordError.value.isNotEmpty()) Color.Red else Color.Unspecified
                     )
                 },
                 leadingIcon = {
@@ -406,10 +321,10 @@ private fun RegisterLandscapeLayout(
                         contentDescription = "Password Icon"
                     )
                 },
-                visualTransformation = if (registerViewModel.passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
+                visualTransformation = if (logicViewModel.passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
                     Icon(
-                        if (registerViewModel.passwordVisible.value) {
+                        if (logicViewModel.passwordVisible.value) {
                             Icons.Filled.Visibility
                         } else {
                             Icons.Filled.VisibilityOff
@@ -418,7 +333,7 @@ private fun RegisterLandscapeLayout(
                         modifier = Modifier
                             .requiredSize(48.dp)
                             .padding(16.dp)
-                            .clickable { registerViewModel.setPasswordVisible(!registerViewModel.passwordVisible.value) }
+                            .clickable { logicViewModel.setPasswordVisible(!logicViewModel.passwordVisible.value) }
                     )
 
 
@@ -426,112 +341,57 @@ private fun RegisterLandscapeLayout(
                 shape = RoundedCornerShape(8.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding( horizontal = 20.dp),
+                    .padding(vertical = 4.dp, horizontal = 20.dp),
                 colors = TextFieldDefaults.colors(
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
                 )
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            TextField(
-                value = registerViewModel.passwordCheck.value,
-                onValueChange = { registerViewModel.setPasswordCheck(it) },
-                label = {
-                    Text(
-                        registerViewModel.passwordCheckError.value.ifEmpty { "Password Confirmation" },
-                        color = if (registerViewModel.passwordCheckError.value.isNotEmpty()) Color.Red else Color.Unspecified
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Rounded.Lock,
-                        contentDescription = "Password Icon"
-                    )
-                },
-                visualTransformation = if (registerViewModel.passwordCheckVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
-                trailingIcon = {
-                    Icon(
-                        if (registerViewModel.passwordCheckVisible.value) {
-                            Icons.Filled.Visibility
-                        } else {
-                            Icons.Filled.VisibilityOff
-                        },
-                        contentDescription = "Toggle password visibility",
-                        modifier = Modifier
-                            .requiredSize(48.dp)
-                            .padding(16.dp)
-                            .clickable { registerViewModel.setPasswordCheckVisible(!registerViewModel.passwordCheckVisible.value) }
-                    )
-
-
-                },
-                shape = RoundedCornerShape(8.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding( horizontal = 20.dp),
-                colors = TextFieldDefaults.colors(
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                )
-            )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             Button(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                 onClick = {
-                    registerViewModel.setEmailError(
-                        if (registerViewModel.email.value.isEmpty()) "Email is required" else if (!Patterns.EMAIL_ADDRESS.matcher(
-                                registerViewModel.email.value
-                            ).matches()
-                        ) "Email is not valid" else ""
-                    )
-
-                    registerViewModel.setPasswordError(if (registerViewModel.password.value.isEmpty()) "Password is required" else "")
-                    registerViewModel.setPasswordCheckError(
-                        if (registerViewModel.passwordCheck.value.isEmpty()) "Password confirmation is required" else
-                            if (registerViewModel.passwordCheck.value != (registerViewModel.password.value)) "Password do not match" else ""
-                    )
-
-
-                    if (registerViewModel.emailError.value.isEmpty() && registerViewModel.passwordError.value.isEmpty() && registerViewModel.passwordCheckError.value.isEmpty()) {
-                        authViewModel.signup(
-                            registerViewModel.email.value,
-                            registerViewModel.password.value
+                    logicViewModel.setEmailError(if (logicViewModel.email.value.isEmpty()) "Email is required" else "")
+                    logicViewModel.setPasswordError(if (logicViewModel.password.value.isEmpty()) "Password is required" else "")
+                    if (logicViewModel.emailError.value.isEmpty() && logicViewModel.passwordError.value.isEmpty()) {
+                        authViewModel.login(
+                            logicViewModel.email.value,
+                            logicViewModel.password.value
                         )
                     }
                 }, enabled = authState.value != AuthState.Loading
-
             ) {
                 Text(
-                    text = "Sign up",
+                    text = "Login",
                     color = Color.White,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.ExtraBold,
                 )
 
             }
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             Row(modifier = Modifier.padding(horizontal = 20.dp)) {
                 Text(
-                    text = "Already have an account? ",
+                    text = "Not a member? ",
                     color = if (isSystemInDarkTheme()) Color.White else Color.Gray,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                 )
                 Text(
-                    text = "Login!",
+                    text = "Sing up now!",
                     color = MaterialTheme.colorScheme.primary,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.clickable {
-                        navController.navigate("login")
+                        navController.navigate("register")
                     }
                 )
             }
 
         }
+
     }
 }
-

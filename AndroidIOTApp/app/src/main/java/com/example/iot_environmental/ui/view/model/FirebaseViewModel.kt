@@ -1,10 +1,10 @@
-package com.example.iot_environmental.ui.view
+package com.example.iot_environmental.ui.view.model
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.example.iot_environmental.ui.data.BaseStationData
-import com.example.iot_environmental.ui.data.NodeData
-import com.example.iot_environmental.ui.data.SensorReading
+import com.example.iot_environmental.data.BaseStationData
+import com.example.iot_environmental.data.NodeData
+import com.example.iot_environmental.data.SensorReading
 
 
 import androidx.lifecycle.LiveData

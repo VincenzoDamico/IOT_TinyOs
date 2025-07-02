@@ -1,5 +1,5 @@
 // com.example.iot_environmental.data.SensorData.kt
-package com.example.iot_environmental.ui.data
+package com.example.iot_environmental.data
 
 import com.google.firebase.database.IgnoreExtraProperties
 

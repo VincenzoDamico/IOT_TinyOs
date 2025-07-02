@@ -1,7 +1,6 @@
 // com.example.iot_environmental.ui.view.HomeScreen.kt
-package com.example.iot_environmental.ui.view
+package com.example.iot_environmental.ui.view.screen
 
-import android.content.res.Configuration
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -38,20 +37,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.iot_environmental.AuthState
-import com.example.iot_environmental.AuthViewModel
 import com.example.iot_environmental.R
 
 import androidx.lifecycle.viewmodel.compose.viewModel // For ViewModel injection
-import com.example.iot_environmental.ui.data.BaseStationData
-import com.example.iot_environmental.ui.data.NodeData
+import com.example.iot_environmental.data.BaseStationData
+import com.example.iot_environmental.data.NodeData
+import com.example.iot_environmental.ui.view.model.AuthState
+import com.example.iot_environmental.ui.view.model.AuthViewModel
+import com.example.iot_environmental.ui.view.model.FirebaseViewModel
 
 @Composable
 fun HomeScreen(
