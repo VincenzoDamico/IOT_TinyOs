@@ -20,12 +20,13 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 300,
-        "y": 280,
+        "x": 320,
+        "y": 400,
         "wires": [
             [
-                "50c8f83d9f7083a5",
-                "0e2c08d6304d7705"
+                "0e2c08d6304d7705",
+                "604b71730f92dfb0",
+                "37bf02a76c09f6ef"
             ]
         ]
     },
@@ -42,63 +43,8 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 540,
-        "y": 440,
-        "wires": []
-    },
-    {
-        "id": "50c8f83d9f7083a5",
-        "type": "function",
-        "z": "4524aab60525fcb7",
-        "name": "function",
-        "func": "let message = msg.payload;\n\nmsg.payload = [\n        { \n            idSensor: message.idSensor,\n            timestamp: message.timestamp\n        },\n        {\n            temperature: message.temperature,\n            humidity: message.humidity,\n            luminosity: message.luminosity\n        },    \n];\n\nreturn msg;\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 520,
-        "y": 280,
-        "wires": [
-            [
-                "0c554a70633a6a62",
-                "37bf02a76c09f6ef"
-            ]
-        ]
-    },
-    {
-        "id": "bb43e5d067244b41",
-        "type": "influxdb out",
-        "z": "4524aab60525fcb7",
-        "influxdb": "6573189d2962e519",
-        "name": "InfluxDB",
-        "measurement": "sensors",
-        "precision": "",
-        "retentionPolicy": "",
-        "database": "database",
-        "precisionV18FluxV20": "ms",
-        "retentionPolicyV18Flux": "",
-        "org": "organisation",
-        "bucket": "bucket",
-        "x": 880,
-        "y": 380,
-        "wires": []
-    },
-    {
-        "id": "0c554a70633a6a62",
-        "type": "debug",
-        "z": "4524aab60525fcb7",
-        "name": "debug 6",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
         "x": 640,
-        "y": 360,
+        "y": 460,
         "wires": []
     },
     {
@@ -108,44 +54,10 @@
         "name": "link out 1",
         "mode": "link",
         "links": [
-            "be9ca095ff6d4281",
             "aa72c25775608b20"
         ],
-        "x": 685,
-        "y": 240,
-        "wires": []
-    },
-    {
-        "id": "be9ca095ff6d4281",
-        "type": "link in",
-        "z": "4524aab60525fcb7",
-        "name": "link in 1",
-        "links": [
-            "37bf02a76c09f6ef"
-        ],
-        "x": 855,
-        "y": 300,
-        "wires": [
-            [
-                "bb43e5d067244b41",
-                "24807bb73fab8244"
-            ]
-        ]
-    },
-    {
-        "id": "24807bb73fab8244",
-        "type": "debug",
-        "z": "4524aab60525fcb7",
-        "name": "debug 7",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1040,
-        "y": 300,
+        "x": 705,
+        "y": 360,
         "wires": []
     },
     {
@@ -156,8 +68,8 @@
         "links": [
             "37bf02a76c09f6ef"
         ],
-        "x": 855,
-        "y": 180,
+        "x": 875,
+        "y": 300,
         "wires": [
             [
                 "7c612d580d6354bf"
@@ -168,16 +80,16 @@
         "id": "7c612d580d6354bf",
         "type": "function",
         "z": "4524aab60525fcb7",
-        "name": "function Firebase",
-        "func": "let message1 = msg.payload[0];\nlet message2 = msg.payload[1];\n\nlet message = { ...message1, ...message2}     //unisce le due parti sopra\n\nmsg.payload = {\n    temperature: message.temperature,\n    humidity: message.humidity,\n    luminosity: message.luminosity,\n    //timestamp: message.timestamp,\n    //idSensor: message.idSensor\n};\n\nmsg.url = \"https://iot-environmental-14e42-default-rtdb.europe-west1.firebasedatabase.app/baseStation/2/\"+\n    message.idSensor + \"/\" + message.timestamp+\".json\";\nreturn msg;",
+        "name": "Format for Firebase",
+        "func": "let message = msg.payload;\nmsg.payload = {\n    temperature: message.temperature,\n    humidity: message.humidity,\n    luminosity: message.luminosity,\n};\n\nmsg.url = \"https://iot-environmental-14e42-default-rtdb.europe-west1.firebasedatabase.app/baseStation/3/\"+\n    message.idSensor + \"/\" + message.timestamp+\".json\";\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1050,
-        "y": 180,
+        "x": 1070,
+        "y": 300,
         "wires": [
             [
                 "57c64e382f7aec1b",
@@ -198,8 +110,8 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1200,
-        "y": 240,
+        "x": 1220,
+        "y": 360,
         "wires": []
     },
     {
@@ -218,11 +130,87 @@
         "authType": "",
         "senderr": false,
         "headers": [],
-        "x": 1210,
-        "y": 140,
+        "x": 1230,
+        "y": 220,
         "wires": [
             []
         ]
+    },
+    {
+        "id": "604b71730f92dfb0",
+        "type": "function",
+        "z": "4524aab60525fcb7",
+        "name": "Parse & Normalize",
+        "func": "// Check if msg.payload exists and is an object\nif (!msg.payload || typeof msg.payload !== \"object\") {\n    node.error(\"msg.payload is missing or not an object\", msg);\n    return null;\n}\n\nlet data = msg.payload;\n\n// Check that the critical fields are present\nif (typeof data.idSensor === \"undefined\" || typeof data.timestamp === \"undefined\") {\n    node.error(\"El payload no contiene 'idSensor' o 'timestamp'\", msg);\n    return null;\n}\n\n// Validate timestamp format before converting\nlet timestamp = data.timestamp;\nif (typeof timestamp !== \"string\" || !timestamp.includes(\"\")) {\n    node.error(\"timestamp tiene un formato inválido: \" + timestamp, msg);\n    return null;\n}\n\n\n\nmsg.sensorId = data.idSensor;\nmsg.timestamp = timestamp.replace(\"_\",\"T\")+\"Z\";\n\nmsg.temperature = data.temperature;\nmsg.humidity = data.humidity;\nmsg.luminosity = data.luminosity;\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 330,
+        "y": 220,
+        "wires": [
+            [
+                "2f333edee11d6fae"
+            ]
+        ]
+    },
+    {
+        "id": "2f333edee11d6fae",
+        "type": "function",
+        "z": "4524aab60525fcb7",
+        "name": "Format for InfluxDB",
+        "func": "msg.payload = [\n  {\n    temperature: msg.temperature,\n    humidity: msg.humidity,\n    luminosity: msg.luminosity\n  },\n  {\n    node: msg.sensorId.toString()\n  }\n];\n\nmsg.timestamp=msg.timestamp;\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 550,
+        "y": 180,
+        "wires": [
+            [
+                "5301f599c35b7e44",
+                "45151bde28f0ffc8"
+            ]
+        ]
+    },
+    {
+        "id": "5301f599c35b7e44",
+        "type": "debug",
+        "z": "4524aab60525fcb7",
+        "name": "Debug InfluxDB",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 660,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "45151bde28f0ffc8",
+        "type": "influxdb out",
+        "z": "4524aab60525fcb7",
+        "influxdb": "influx_v2",
+        "name": "InfluxDB Write",
+        "measurement": "baseStationData",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "us",
+        "retentionPolicyV18Flux": "",
+        "org": "iot-museum",
+        "bucket": "iot-museum-bucket",
+        "x": 840,
+        "y": 140,
+        "wires": []
     },
     {
         "id": "407a01e4.6b637",
@@ -252,16 +240,16 @@
         "sessionExpiry": ""
     },
     {
-        "id": "6573189d2962e519",
+        "id": "influx_v2",
         "type": "influxdb",
-        "hostname": "localhost",
+        "hostname": "127.0.0.1",
         "port": "8086",
         "protocol": "http",
-        "database": "sensors",
-        "name": "InfluxDB",
+        "database": "database",
+        "name": "InfluxDB v2",
         "usetls": false,
         "tls": "",
-        "influxdbVersion": "1.x",
+        "influxdbVersion": "2.0",
         "url": "http://localhost:8086",
         "timeout": "10",
         "rejectUnauthorized": true
