@@ -349,7 +349,7 @@
     }
   ],
   "preload": false,
-  "refresh": "10s",
+  "refresh": "5s",
   "schemaVersion": 41,
   "tags": [],
   "templating": {
@@ -357,8 +357,8 @@
       {
         "allowCustomValue": false,
         "current": {
-          "text": "1",
-          "value": "1"
+          "text": "2",
+          "value": "2"
         },
         "datasource": {
           "type": "influxdb",
@@ -366,7 +366,7 @@
         },
         "definition": "import \"influxdata/influxdb/schema\"\r\n\r\nschema.tagValues(\r\n  bucket: \"iot-museum-bucket\",\r\n  predicate: (r) => r._measurement == \"baseStationData\",\r\n  tag: \"node\",\r\n  start: v.timeRangeStart\r\n)\r\n\r\n",
         "includeAll": false,
-        "label": "Select Room",
+        "label": "Select Node",
         "name": "node_id",
         "options": [],
         "query": {
@@ -378,14 +378,14 @@
       {
         "allowCustomValue": false,
         "current": {
-          "text": "temperature",
-          "value": "temperature"
+          "text": "luminosity",
+          "value": "luminosity"
         },
         "label": "Select Parameter",
         "name": "field",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "temperature",
             "value": "temperature"
           },
@@ -395,7 +395,7 @@
             "value": "humidity"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "luminosity",
             "value": "luminosity"
           }
@@ -406,12 +406,12 @@
     ]
   },
   "time": {
-    "from": "now-3h",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "IoT Museum Dashboard",
   "uid": "65dd7704-e2ec-406a-8d42-fdfba5ad76f9",
-  "version": 7
+  "version": 8
 }
